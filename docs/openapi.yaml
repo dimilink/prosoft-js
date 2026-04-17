@@ -1,0 +1,532 @@
+openapi: 3.0.3
+info:
+  title: Books Shop API
+  version: 0.1.0
+servers:
+  - url: http://localhost:8080
+    description: Server
+paths:
+  /api/health:
+    get:
+      operationId: getHealth
+      tags:
+        - Health
+      summary: Проверяет состояние приложения
+      description: >-
+        Выполняет проверку состояния приложения. Возвращет ответ со статусом `200` в случае успеха.
+      security:
+        - session_id: []
+      responses:
+        '200':
+          description: OK.
+        '500':
+          $ref: '#/components/responses/500'
+
+  /api/auth/user:
+    post:
+      operationId: authenticateUser
+      tags:
+        - Auth
+      summary: Выполняет аутентификацию пользователя с помощью логина и пароля.
+      description: >-
+        Выполняет аутентификацию пользователя с помощью логина и пароля, создаёт сессию
+        и сохраняет её идентификатор в cookie `us`. В теле ответа сервера содержится информация о
+        роли пользователя.
+      security:
+        - session_id: []
+        - {}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                login:
+                  type: string
+                  description: Логин пользователя
+                password:
+                  type: string
+                  description: Пароль пользователя.
+              required:
+                - login
+                - password
+            example:
+              login: user
+              password: user
+      responses:
+        '200':
+          description: OK.
+          headers:
+            Set-Cookie:
+              description: Идентификатор сессии пользователя.
+              schema:
+                type: string
+                example: >-
+                  us=K18f2BTlznZYwxbqlZbbXk6T_cwUWW8N.Uz6gF5piZZzElAiFQzfLEB1BhUhvZLYIjRlQ0BrTtfU
+                  Path=/api;
+                  Expires=Thu, 1 Jan 2026 08:13:07 GMT;
+                  HttpOnly;
+                  SameSite=Strict
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  login:
+                    type: string
+                  role:
+                    type: string
+                  created_at:
+                    type: string
+                required:
+                  - login
+                  - role
+                  - created_at
+              example:
+                login: user
+                role: user
+                created_at: 2025-12-12T14:19:05.242Z
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+
+  /api/me:
+    get:
+      operationId: getMe
+      tags:
+        - Auth
+      summary: Возвращает информацию о текущем аутентифицированном пользователе
+      description: Возвращает информацию о текущем аутентифицированном пользователе.
+      security:
+        - session_id: []
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  login:
+                    type: string
+                  role:
+                    type: string
+                  created_at:
+                    type: string
+                required:
+                  - login
+                  - role
+                  - created_at
+              example:
+                login: user
+                role: user
+                created_at: 2025-12-12T14:19:05.242Z
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+
+  /api/books:
+    get:
+      operationId: getBooks
+      tags:
+        - Books
+      summary: Возвращает список книг, опубликованных в каталоге
+      description:  Возвращает список книг, опубликованных в каталоге.
+      security:
+        - session_id: []
+      parameters:
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/count'
+        - name: sort
+          in: query
+          description: Имя атрибута, по которому будет выполнена сортировка каталога книг.
+          schema:
+            type: string
+            enum:
+              - name
+              - created_at
+            default: created_at
+        - name: order
+          in: query
+          description: Порядок сортировки.
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: desc
+      responses:
+        '200':
+          description: OK.
+          headers:
+            X-Total-Count:
+              $ref: '#/components/headers/X-Total-Count'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/book-response'
+              example:
+                - id: 1612fbea-387a-4f9a-889c-41d39c2b44c0
+                  name: >-
+                    Окружающий мир, Буква-Ленд, сборник шпаргалок 1-4 класс, ФГОС. Соколова Юлия
+                    Сергеевна
+                  description: >-
+                    Пособие предназначено для учеников начальной школы и их родителей, охватывает
+                    материалы, полезные для детей с 1 по 4 класс.
+                  publisher: admin
+                  created_at: 2025-12-12T12:04:40.081Z
+                - id: 1612fbea-387a-4f9a-889c-41d39c2b44c0
+                  name: >-
+                    Самоучитель английского языка. Английский с нуля. Учебник. Бебрис Александр
+                    Олегович
+                  description: >-
+                    Простой и понятный пошаговый подход, системные упражнения и формулы делают
+                    обучение лёгким и доступным для каждого. Методика успешно протестирована на
+                    фокус-группах разных возрастов и поможет вам быстро достичь результата, даже
+                    если у вас нет времени на занятия с репетитором.
+                    Не важно, с какого уровня вы начинаете. Главное — ваша цель.
+                  publisher: admin
+                  created_at: 2025-12-12T12:04:40.081Z
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '500':
+          $ref: '#/components/responses/500'
+
+    post:
+      operationId: publishBook
+      tags:
+        - Books
+      summary: Публикует книгу в каталоге
+      description: Публикует книгу в каталоге.
+      security:
+        - session_id: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Название книги.
+                  pattern: ^[a-zA-Zа-яА-Я\d,;:.!?'\"\-— /()\[\]]+$
+                description:
+                  type: string
+                  description: Описание книги.
+                  pattern: ^[a-zA-Zа-яА-Я\d,;:.!?'\"\-— /()\[\]]+$
+              required:
+                - name
+                - description
+            example:
+              name: >-
+                Самоучитель английского языка. Английский с нуля. Учебник. Бебрис Александр
+                Олегович
+              description: >-
+                Простой и понятный пошаговый подход, системные упражнения и формулы делают
+                обучение лёгким и доступным для каждого. Методика успешно протестирована на
+                фокус-группах разных возрастов и поможет вам быстро достичь результата, даже
+                если у вас нет времени на занятия с репетитором.
+                Не важно, с какого уровня вы начинаете. Главное — ваша цель.
+      responses:
+        '201':
+          description: Книга успешно опубликована.
+          headers:
+            Location:
+              description: Адрес созданного ресурса.
+              schema:
+                type: string
+              example: http://localhost:8080/books/1612fbea-387a-4f9a-889c-41d39c2b44c0
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/book-response'
+              example:
+                id: 1612fbea-387a-4f9a-889c-41d39c2b44c0
+                name: >-
+                  Самоучитель английского языка. Английский с нуля. Учебник. Бебрис Александр
+                  Олегович
+                description: >-
+                  Простой и понятный пошаговый подход, системные упражнения и формулы делают
+                  обучение лёгким и доступным для каждого. Методика успешно протестирована на
+                  фокус-группах разных возрастов и поможет вам быстро достичь результата, даже
+                  если у вас нет времени на занятия с репетитором.
+                  Не важно, с какого уровня вы начинаете. Главное — ваша цель.
+                publisher: admin
+                created_at: 2025-12-12T12:04:40.081Z
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '500':
+          $ref: '#/components/responses/500'
+
+  /api/books/:bookId:
+    get:
+      operationId: getBook
+      tags:
+        - Books
+      summary: Возвращает информацию о книге
+      description: Возвращает информацию о книге с идентификатором `bookId`.
+      security:
+        - session_id: []
+      parameters:
+        - $ref: '#/components/parameters/bookId'
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/book-response'
+              example:
+                id: 1612fbea-387a-4f9a-889c-41d39c2b44c0
+                name: >-
+                  Самоучитель английского языка. Английский с нуля. Учебник. Бебрис Александр
+                  Олегович
+                description: >-
+                  Простой и понятный пошаговый подход, системные упражнения и формулы делают
+                  обучение лёгким и доступным для каждого. Методика успешно протестирована на
+                  фокус-группах разных возрастов и поможет вам быстро достичь результата, даже
+                  если у вас нет времени на занятия с репетитором.
+                  Не важно, с какого уровня вы начинаете. Главное — ваша цель.
+                publisher: admin
+                created_at: 2025-12-12T12:04:40.081Z
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+
+    patch:
+      operationId: updateBook
+      tags:
+        - Books
+      summary: Обновляет информацию о книге
+      description: >-
+        Обновляет информацию о книге. Запрос разрешён только для пользовалей с ролью
+        `admin`.
+      security:
+        - session_id: []
+      parameters:
+        - $ref: '#/components/parameters/bookId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Название книги.
+                description:
+                  type: string
+                  description: Описание книги.
+            example:
+              name: Английский с нуля. Бебрис Александр Олегович
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/book-response'
+              example:
+                id: 1612fbea-387a-4f9a-889c-41d39c2b44c0
+                name: >-
+                  Английский с нуля. Бебрис Александр Олегович
+                description: >-
+                  Простой и понятный пошаговый подход, системные упражнения и формулы делают
+                  обучение лёгким и доступным для каждого. Методика успешно протестирована на
+                  фокус-группах разных возрастов и поможет вам быстро достичь результата, даже
+                  если у вас нет времени на занятия с репетитором.
+                  Не важно, с какого уровня вы начинаете. Главное — ваша цель.
+                publisher: admin
+                created_at: 2025-12-12T12:04:40.081Z
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+components:
+  parameters:
+    # query
+    offset:
+      name: offset
+      in: query
+      description: Отступ от начала списка.
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+
+    count:
+      name: count
+      in: query
+      description: Максимальное количество элементов в списке.
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 15
+        default: 15
+
+    start_date:
+      name: start_date
+      in: query
+      description: Начальная дата создания в формате ISO 8601.
+      required: false
+      schema:
+        type: string
+      example: 2023-12-05T06:50:22.438Z
+
+    end_date:
+      name: end_date
+      in: query
+      description: Конечная дата создания в формате ISO 8601.
+      required: false
+      schema:
+        type: string
+      example: 2023-12-05T06:50:22.438Z
+
+    # path
+    bookId:
+      name: bookId
+      in: path
+      description: Идентификатор книги.
+      required: true
+      schema:
+        type: string
+      example: 1612fbea-387a-4f9a-889c-41d39c2b44c0
+
+  schemas:
+    book-response:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Идентификатор книги.
+        name:
+          type: string
+          description: Название книги.
+        description:
+          type: string
+          description: Описание книги.
+        publisher:
+          type: string
+          description: Имя пользователя, опубликовавшего книгу.
+        created_at:
+          type: string
+          description: Дата создания в формате ISO 8601.
+      required:
+        - id
+        - name
+        - description
+        - publisher
+        - created_at
+
+  headers:
+    X-Total-Count:
+      description: Общее количество ресурсов, соответствующее запросу.
+      schema:
+        type: integer
+
+  responses:
+    '400':
+      description: Ошибка валидации запроса. Поле `message` содержит пояснение, в какой части запроса
+        была допущена ошибка.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              type:
+                type: string
+              message:
+                type: string
+          example:
+            type: validation
+            message: '{error_message}'
+    '401':
+      description: Ошибка аутентификации.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              type:
+                type: string
+              message:
+                type: string
+          example:
+            type: access
+            message: Failed to verify access token.
+    '403':
+      description: Ошибка авторизации.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              type:
+                type: string
+              message:
+                type: string
+          example:
+            type: access
+            message: Not authorized.
+    '404':
+      description: Ресурс не найден.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              type:
+                type: string
+              message:
+                type: string
+            example:
+              type: logic
+              message: '{error_message}'
+    '500':
+      description: Внутренняя ошибка сервера.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              type:
+                type: string
+              message:
+                type: string
+            example:
+              type: internal
+              message: Internal server error.
+
+  securitySchemes:
+    session_id:
+      name: us
+      description: Идентификатор сессии пользователя.
+      type: apiKey
+      in: cookie
+

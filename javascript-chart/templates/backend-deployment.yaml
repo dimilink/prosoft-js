@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-backend
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-backend
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-backend
+    spec:
+      containers:
+          - name: backend
+            image: "{{ .Values.backend.repository }}:{{ .Values.backend.tag }}"
+            imagePullPolicy: {{ .Values.imagePullPolicy }}
+            workingDir: /app
+            ports:
+              - containerPort: {{ .Values.backend.port }}
+                name: http
+            env:
+              - name: COOKIE_SECRET
+                value: {{ .Values.backend.cookieSecret | quote }}
+            resources:
+              limits:
+                cpu: {{ .Values.resources.limits.cpu }}
+                memory: {{ .Values.resources.limits.memory }}
+              requests:
+                cpu: {{ .Values.resources.requests.cpu }}
+                memory: {{ .Values.resources.requests.memory }}

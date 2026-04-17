@@ -1,0 +1,41 @@
+# Общие настройки
+replicaCount: 1
+imagePullPolicy: IfNotPresent
+
+# Настройки образов (обычно задаются реальные registry)
+frontend:
+  repository: localhost/frontend
+  tag: latest
+  port: 8080
+  # Опциональный NodePort для доступа из локальной сети
+  nodePort:
+    enabled: false
+    port: 30081
+
+backend:
+  repository: localhost/backend
+  tag: latest
+  port: 8080
+  cookieSecret: ""  # Задайте через --set или secret, в values секреты не хранят
+  nodePort:
+    enabled: false
+    port: 30082
+
+nginx:
+  repository: nginx
+  tag: "1.29.4"
+  port: 8080
+  # Основной сервис обычно доступ реализуется через Ingress/LoadBalancer,
+  # но можно включить NodePort для отладки в dev-окружении при необходимости
+  nodePort:
+    enabled: false
+    port: 30080
+
+# Ресурсы контейнеров
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi

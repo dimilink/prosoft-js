@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "outDir": "/build",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "files": [],
+  "include": [],
+  "references": [
+    { "path": "./src" }
+  ]
+}
+
