@@ -16,10 +16,13 @@ spec:
           - name: frontend
             image: "{{ .Values.frontend.repository }}:{{ .Values.frontend.tag }}"
             imagePullPolicy: {{ .Values.imagePullPolicy }}
-            workingDir: /app
-            ports:
-              - containerPort: {{ .Values.frontend.port }}
-                name: http
+            workingDir: /src
+              ports:
+                  - containerPort: { { .Values.frontend.port } }
+                    name: http
+              volumeMounts:
+                - name: frontend-src
+                  mountPath: /src
             resources:
               limits:
                 cpu: {{ .Values.resources.limits.cpu }}
@@ -27,3 +30,30 @@ spec:
               requests:
                 cpu: {{ .Values.resources.requests.cpu }}
                 memory: {{ .Values.resources.requests.memory }}
+
+            # === LIVENESS PROBE ===
+            { { - if .Values.frontend.livenessProbe.enabled } }
+            livenessProbe:
+              httpGet:
+                path: { { .Values.frontend.livenessProbe.path } }
+                port: http
+              initialDelaySeconds: 30
+              periodSeconds: { { .Values.frontend.livenessProbe.periodSeconds } }
+              failureThreshold: { { .Values.frontend.livenessProbe.failureThreshold } }
+            { { - end } }
+
+            # === READINESS PROBE ===
+            { { - if .Values.frontend.readinessProbe.enabled } }
+            readinessProbe:
+              httpGet:
+                path: { { .Values.frontend.readinessProbe.path } }
+                port: http
+              initialDelaySeconds: 15
+              periodSeconds: { { .Values.frontend.readinessProbe.periodSeconds } }
+            { { - end } }
+
+      volumes:
+          - name: frontend-src
+            hostPath:
+              path: /src
+              type: Directory

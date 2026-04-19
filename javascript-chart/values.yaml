@@ -11,6 +11,17 @@ frontend:
   nodePort:
     enabled: false
     port: 30081
+  livenessProbe:
+    enabled: true
+    path: /
+    initialDelaySeconds: 15
+    periodSeconds: 20
+    failureThreshold: 3
+  readinessProbe:
+      enabled: true
+      path: /
+      initialDelaySeconds: 5
+      periodSeconds: 10
 
 backend:
   repository: localhost/backend
@@ -20,16 +31,36 @@ backend:
   nodePort:
     enabled: false
     port: 30082
+  livenessProbe:
+    enabled: true
+    path: /api
+    initialDelaySeconds: 20
+    periodSeconds: 20
+    failureThreshold: 3
+  readinessProbe:
+      enabled: true
+      path: /api
+      initialDelaySeconds: 5
+      periodSeconds: 10
 
 nginx:
   repository: nginx
   tag: "1.29.4"
   port: 8080
-  # Основной сервис обычно доступ реализуется через Ingress/LoadBalancer,
+  # Обычно доступ реализуется через Ingress/LoadBalancer,
   # но можно включить NodePort для отладки в dev-окружении при необходимости
   nodePort:
     enabled: false
     port: 30080
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 20
+    failureThreshold: 3
+  readinessProbe:
+      enabled: true
+      initialDelaySeconds: 5
+      periodSeconds: 10
 
 # Ресурсы контейнеров
 resources:
