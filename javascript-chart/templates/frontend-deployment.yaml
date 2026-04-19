@@ -18,13 +18,10 @@ spec:
           - name: frontend
             image: "{{ .Values.frontend.repository }}:{{ .Values.frontend.tag }}"
             imagePullPolicy: {{ .Values.imagePullPolicy }}
-            workingDir: /src
+            workingDir: /app
             ports:
               - containerPort: {{ .Values.frontend.port }}
                 name: http
-            volumeMounts:
-              - name: frontend-src
-                mountPath: /src
             resources:
               limits:
                 cpu: {{ .Values.resources.limits.cpu }}
@@ -49,8 +46,3 @@ spec:
               initialDelaySeconds: {{ .Values.frontend.readinessProbe.initialDelaySeconds }}
               periodSeconds: {{ .Values.frontend.readinessProbe.periodSeconds }}
         {{- end }}
-      volumes:
-        - name: frontend-src
-          hostPath:
-            path: /src
-            type: Directory

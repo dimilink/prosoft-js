@@ -26,3 +26,21 @@ EXPOSE 8080
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
+
+FROM base AS production
+
+ARG USERNAME=node
+ARG APP_PATH=/app
+
+WORKDIR ${APP_PATH}
+
+COPY --from=build --chown=${USERNAME}:${USERNAME} ${SOURCES_PATH}/package.json ./
+COPY --from=build --chown=${USERNAME}:${USERNAME} ${SOURCES_PATH}/node_modules ./node_modules
+
+COPY --from=build --chown=${USERNAME}:${USERNAME} ${SOURCES_PATH}/dist ./dist
+
+EXPOSE 8080
+USER ${USERNAME}
+
+CMD ["yarn", "start"]
+
