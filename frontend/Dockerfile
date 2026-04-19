@@ -45,11 +45,10 @@ WORKDIR ${APP_PATH}
 COPY --from=build --chown=${USERNAME}:${USERNAME} ${SOURCES_PATH}/package.json ./
 COPY --from=build --chown=${USERNAME}:${USERNAME} ${SOURCES_PATH}/node_modules ./node_modules
 
-COPY --from=build --chown=${USERNAME}:${USERNAME} ${SOURCES_PATH}/dist ./dist
+COPY --from=build --chown=${USERNAME}:${USERNAME} ${SOURCES_PATH}/build ./dist
 
 EXPOSE 8080
 USER ${USERNAME}
 
-RUN npm install -g serve
-CMD ["serve", "-s", "dist", "-l", "8080", "--host", "0.0.0.0"]
+CMD ["npx", "vite", "preview", "--port", "8080", "--host", "0.0.0.0"]
 
