@@ -50,5 +50,5 @@ COPY --from=build --chown=${USERNAME}:${USERNAME} ${SOURCES_PATH}/dist ./dist
 EXPOSE 8080
 USER ${USERNAME}
 
-CMD ["yarn", "start"]
+CMD ["serve", "-s", "dist", "-l", "8080"]
 
