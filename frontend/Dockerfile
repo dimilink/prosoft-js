@@ -50,5 +50,5 @@ COPY --from=build --chown=${USERNAME}:${USERNAME} ${SOURCES_PATH}/dist ./dist
 EXPOSE 8080
 USER ${USERNAME}
 
-CMD ["serve", "-s", "dist", "-l", "8080"]
+CMD ["npx", "vite", "preview", "--port", "8080", "--host", "0.0.0.0"]
 
