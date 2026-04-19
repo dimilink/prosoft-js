@@ -50,5 +50,6 @@ COPY --from=build --chown=${USERNAME}:${USERNAME} ${SOURCES_PATH}/dist ./dist
 EXPOSE 8080
 USER ${USERNAME}
 
-CMD ["npx", "vite", "preview", "--port", "8080", "--host", "0.0.0.0"]
+RUN npm install -g serve
+CMD ["serve", "-s", "dist", "-l", "8080", "--host", "0.0.0.0"]
 
