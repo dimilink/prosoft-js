@@ -18,7 +18,7 @@ spec:
             imagePullPolicy: {{ .Values.imagePullPolicy }}
             workingDir: /src
               ports:
-                  - containerPort: { { .Values.frontend.port } }
+                  - containerPort: {{ .Values.frontend.port }}
                     name: http
               volumeMounts:
                 - name: frontend-src
