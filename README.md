@@ -11,7 +11,11 @@ cd prosoft-js
 
 2. **Сборка образов:**
 ```bash
-docker build -t localhost/frontend:latest ./frontend
+docker build \
+  --target production \
+  --no-cache \
+  -t localhost/frontend:latest \
+  ./frontend
 ```
 ```bash
 docker build \
@@ -26,6 +30,11 @@ docker build \
 minikube image load localhost/frontend:latest
 minikube image load localhost/backend:latest
 ```
+Или переключиться на контекст Docker в minikube:
+```bash
+eval $(minikube docker-env)
+```
+затем выполнить команды сборки образов.
 > В реальном проекте у Kubernetes должен быть доступ к внешнему контейнерному реестру, например
 > Docker Hub, GitHub Container Registry, Yandex Container Registry, Harbor, GitLab Registry и т.д.
 В таком случае лучше не использовать тег `latest`, протегируйте образы, например следующим образом:
@@ -51,11 +60,8 @@ helm install my-js-app ./javascript-chart \
 ```bash
 helm install my-js-app ./javascript-chart \
   --set nginx.nodePort.enabled=true \
-  --set nginx.nodePort.port=30080 \
   --set frontend.nodePort.enabled=true \
-  --set frontend.nodePort.port=30081 \
   --set backend.nodePort.enabled=true \
-  --set backend.nodePort.port=30082 \
   --set backend.cookieSecret="your-secret-value"
 ```
 > В реальном проекте для доступа к сервисам используется Ingress + TLS и вместо `cookieSecret` в values Kubernetes Secret + envFrom
@@ -68,7 +74,7 @@ kubectl get pods -l app=my-js-app-frontend
 
 kubectl get pods -l app=my-js-app-backend
 ```
-Все поды должны иметь статус RUNNING.
+Все поды должны иметь статус RUNNING, READY 1/1 (по умолчанию).
 
 5. **Удаление релиза приложения:**
 ```bash
