@@ -32,7 +32,7 @@ spec:
                 memory: {{ .Values.resources.requests.memory }}
 
             # === LIVENESS PROBE ===
-            {{ - if .Values.backend.livenessProbe.enabled }}
+            {{- if .Values.backend.livenessProbe.enabled }}
             livenessProbe:
               httpGet:
                 path: {{ .Values.backend.livenessProbe.path }}
@@ -40,14 +40,14 @@ spec:
               initialDelaySeconds: {{ .Values.backend.livenessProbe.initialDelaySeconds }}
               periodSeconds: {{ .Values.backend.livenessProbe.periodSeconds }}
               failureThreshold: {{ .Values.backend.livenessProbe.failureThreshold }}
-            {{ - end }}
+            {{- end }}
 
             # === READINESS PROBE ===
-            {{ - if .Values.backend.readinessProbe.enabled }}
+            {{- if .Values.backend.readinessProbe.enabled }}
             readinessProbe:
               httpGet:
                 path: {{ .Values.backend.readinessProbe.path }}
                 port: http
               initialDelaySeconds: {{ .Values.backend.readinessProbe.initialDelaySeconds }}
               periodSeconds: {{ .Values.backend.readinessProbe.periodSeconds }}
-            {{ - end }}
+            {{- end }}

@@ -32,23 +32,23 @@ spec:
                 memory: {{ .Values.resources.requests.memory }}
 
             # === LIVENESS PROBE (TCP) ===
-            {{ - if .Values.nginx.livenessProbe.enabled }}
+            {{- if .Values.nginx.livenessProbe.enabled }}
             livenessProbe:
               tcpSocket:
                 port: {{ .Values.nginx.port }}
               initialDelaySeconds: {{ .Values.nginx.livenessProbe.initialDelaySeconds }}
               periodSeconds: {{ .Values.nginx.livenessProbe.periodSeconds }}
               failureThreshold: {{ .Values.nginx.livenessProbe.failureThreshold }}
-            {{ - end }}
+            {{- end }}
 
             # === READINESS PROBE (TCP) ===
-            {{ - if .Values.nginx.readinessProbe.enabled }}
+            {{- if .Values.nginx.readinessProbe.enabled }}
             readinessProbe:
               tcpSocket:
                 port: {{ .Values.nginx.port }}
               initialDelaySeconds: {{ .Values.nginx.readinessProbe.initialDelaySeconds }}
               periodSeconds: {{ .Values.nginx.readinessProbe.periodSeconds }}
-            {{ - end }}
+            {{- end }}
 
       volumes:
         - name: nginx-config
