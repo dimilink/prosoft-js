@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}-frontend
+  labels:
+    app: {{ .Release.Name }}-frontend
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -17,12 +19,12 @@ spec:
             image: "{{ .Values.frontend.repository }}:{{ .Values.frontend.tag }}"
             imagePullPolicy: {{ .Values.imagePullPolicy }}
             workingDir: /src
-              ports:
-                  - containerPort: {{ .Values.frontend.port }}
-                    name: http
-              volumeMounts:
-                - name: frontend-src
-                  mountPath: /src
+            ports:
+              - containerPort: {{ .Values.frontend.port }}
+                name: http
+            volumeMounts:
+              - name: frontend-src
+                mountPath: /src
             resources:
               limits:
                 cpu: {{ .Values.resources.limits.cpu }}
@@ -30,30 +32,25 @@ spec:
               requests:
                 cpu: {{ .Values.resources.requests.cpu }}
                 memory: {{ .Values.resources.requests.memory }}
-
-            # === LIVENESS PROBE ===
-            {{- if .Values.frontend.livenessProbe.enabled }}
+        {{- if .Values.frontend.livenessProbe.enabled }}
             livenessProbe:
               httpGet:
                 path: {{ .Values.frontend.livenessProbe.path }}
                 port: http
-              initialDelaySeconds: 30
+              initialDelaySeconds: {{ .Values.frontend.livenessProbe.initialDelaySeconds }}
               periodSeconds: {{ .Values.frontend.livenessProbe.periodSeconds }}
               failureThreshold: {{ .Values.frontend.livenessProbe.failureThreshold }}
-            {{- end }}
-
-            # === READINESS PROBE ===
-            {{- if .Values.frontend.readinessProbe.enabled }}
+        {{- end }}
+        {{- if .Values.frontend.readinessProbe.enabled }}
             readinessProbe:
               httpGet:
                 path: {{ .Values.frontend.readinessProbe.path }}
                 port: http
-              initialDelaySeconds: 15
+              initialDelaySeconds: {{ .Values.frontend.readinessProbe.initialDelaySeconds }}
               periodSeconds: {{ .Values.frontend.readinessProbe.periodSeconds }}
-            {{- end }}
-
+        {{- end }}
       volumes:
-          - name: frontend-src
-            hostPath:
-              path: /src
-              type: Directory
+        - name: frontend-src
+          hostPath:
+            path: /src
+            type: Directory
